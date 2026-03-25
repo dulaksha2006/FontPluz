@@ -3,256 +3,498 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FontForge — Web Font Converter</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet" />
+  <title>FontPluz — Web Font Converter</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     :root {
-      --ink: #0f0f0f;
-      --paper: #f5f0e8;
-      --accent: #c84b00;
-      --muted: #6b6560;
-      --border: #d6cfc4;
-      --success: #1a6b3c;
+      --bg:      #0a0a0f;
+      --card:    #111118;
+      --border:  rgba(155,135,245,0.18);
+      --red:     #9b87f5;
+      --red-dim: rgba(155,135,245,0.08);
+      --white:   #f0f0f4;
+      --sub:   #9a8ab8;
+      --muted: #5a4a72;
     }
-    * { box-sizing: border-box; }
-    body {
-      background-color: var(--paper);
-      color: var(--ink);
-      font-family: 'DM Sans', sans-serif;
-      min-height: 100vh;
+
+    html, body {
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--white);
+      font-family: 'Roboto', sans-serif;
     }
-    .mono { font-family: 'Space Mono', monospace; }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 900px; height: 500px;
+      background: radial-gradient(ellipse at top, rgba(155,135,245,0.13) 0%, transparent 65%);
+      pointer-events: none;
+    }
+
+    /* ── Header ── */
+    .header {
+      position: sticky; top: 0; z-index: 50;
+      border-bottom: 1px solid var(--border);
+      background: rgba(10,10,15,0.90);
+      backdrop-filter: blur(20px);
+    }
+    .header-inner {
+      max-width: 640px; margin: 0 auto;
+      padding: 14px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 18px; font-weight: 700; letter-spacing: -0.3px;
+    }
+    .logo-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--red);
+      box-shadow: 0 0 10px var(--red);
+      animation: blink 2.2s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+    .status-pill {
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: var(--red);
+      border: 1px solid rgba(155,135,245,0.35);
+      padding: 4px 12px; border-radius: 2px;
+    }
+
+    /* ── Page ── */
+    .page {
+      max-width: 640px; margin: 0 auto;
+      padding: 52px 24px 64px;
+    }
+
+    /* ── Eyebrow ── */
+    .eyebrow {
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 2.5px; text-transform: uppercase;
+      color: var(--red); margin-bottom: 16px;
+      text-align: center;
+      opacity: 0; animation: up 0.5s 0.05s ease forwards;
+    }
+
+    h1 {
+      font-size: clamp(26px, 5vw, 40px);
+      font-weight: 700; line-height: 1.15;
+      letter-spacing: -0.5px; margin-bottom: 12px;
+      text-align: center;
+      opacity: 0; animation: up 0.5s 0.12s ease forwards;
+    }
+
+    .desc {
+      font-size: 14px; color: var(--sub);
+      line-height: 1.7; margin-bottom: 40px; max-width: 420px;
+      text-align: center; margin-left: auto; margin-right: auto;
+      opacity: 0; animation: up 0.5s 0.19s ease forwards;
+    }
+
+    .divider {
+      height: 1px; background: var(--border);
+      margin-bottom: 32px;
+      opacity: 0; animation: up 0.5s 0.26s ease forwards;
+    }
+
+    /* ── Dropzone ── */
     #dropzone {
-      border: 2px dashed var(--border);
-      transition: border-color 0.2s, background 0.2s;
+      border: 1px solid var(--border);
+      background: var(--card);
+      border-left: 3px solid var(--red);
+      border-radius: 12px;
+      cursor: pointer; padding: 40px 32px;
+      text-align: center; margin-bottom: 14px;
+      transition: background 0.2s, border-color 0.2s;
+      opacity: 0; animation: up 0.5s 0.30s ease forwards;
+    }
+    #dropzone:hover, #dropzone.drag-over {
+      background: rgba(155,135,245,0.04);
+      border-color: rgba(155,135,245,0.50);
+    }
+    #dropzone.drag-over { border-style: dashed; }
+
+    .drop-icon {
+      font-size: 32px; color: var(--red);
+      margin-bottom: 14px;
+      display: block;
+    }
+    .drop-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+    .drop-sub   { font-size: 13px; color: var(--sub); margin-bottom: 20px; }
+
+    .fmt-badges { display: flex; gap: 8px; justify-content: center; }
+    .fmt-badge {
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--red);
+      border: 1px solid rgba(155,135,245,0.35);
+      padding: 3px 10px; border-radius: 2px;
+    }
+
+    .file-icon  { font-size: 28px; color: var(--red); margin-bottom: 12px; }
+    .file-label {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 6px;
+    }
+    #selected-name {
+      font-size: 16px; font-weight: 700; color: var(--red);
+      max-width: 320px; margin: 0 auto 4px;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    #selected-size { font-size: 12px; color: var(--sub); }
+
+    /* ── Buttons ── */
+    .btn-row {
+      display: flex; gap: 10px; margin-bottom: 16px;
+      opacity: 0; animation: up 0.5s 0.36s ease forwards;
+    }
+
+    #convertBtn {
+      flex: 1; padding: 13px;
+      background: var(--red); color: #fff;
+      border: none; border-radius: 8px;
+      font-family: 'Roboto', sans-serif;
+      font-size: 13px; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase;
       cursor: pointer;
+      box-shadow: 0 0 24px rgba(155,135,245,0.25);
+      transition: all 0.2s;
     }
-    #dropzone.drag-over {
-      border-color: var(--accent);
-      background: rgba(200, 75, 0, 0.04);
+    #convertBtn:disabled {
+      background: var(--card); color: var(--muted);
+      box-shadow: none; cursor: not-allowed;
+      border: 1px solid var(--border);
     }
-    #dropzone:hover { border-color: var(--accent); }
-    #progress-bar { width: 0%; transition: width 0.4s ease; }
-    .dl-card { animation: popIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both; }
-    @keyframes popIn {
-      from { opacity: 0; transform: scale(0.92); }
-      to { opacity: 1; transform: scale(1); }
+    #convertBtn:not(:disabled):hover {
+      background: #f04040;
+      box-shadow: 0 0 40px rgba(155,135,245,0.40);
+      transform: translateY(-1px);
     }
-    .dl-card:nth-child(2) { animation-delay: 0.08s; }
-    .dl-card:nth-child(3) { animation-delay: 0.16s; }
+
+    #resetBtn {
+      padding: 13px 20px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px; color: var(--sub);
+      font-family: 'Roboto', sans-serif;
+      font-size: 13px; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase;
+      cursor: pointer; transition: all 0.2s;
+    }
+    #resetBtn:hover { border-color: rgba(155,135,245,0.40); color: var(--white); }
+
+    /* ── Progress ── */
+    .progress-track {
+      height: 2px; background: var(--border);
+      border-radius: 2px; overflow: hidden;
+    }
+    #progress-bar {
+      height: 100%; width: 0%; border-radius: 2px;
+      background: var(--red);
+      box-shadow: 0 0 8px var(--red);
+      transition: width 0.35s ease;
+    }
     .spinner {
-      width: 20px; height: 20px;
-      border: 2px solid var(--border);
-      border-top-color: var(--accent);
+      width: 15px; height: 15px; flex-shrink: 0;
+      border: 1.5px solid var(--border);
+      border-top-color: var(--red);
       border-radius: 50%;
       animation: spin 0.7s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .grid-bg {
-      background-image: linear-gradient(var(--border) 1px, transparent 1px),
-                        linear-gradient(90deg, var(--border) 1px, transparent 1px);
-      background-size: 40px 40px;
-      opacity: 0.4;
+
+    /* ── Error ── */
+    .err-box {
+      display: flex; align-items: flex-start; gap: 10px;
+      background: rgba(155,135,245,0.06);
+      border: 1px solid rgba(155,135,245,0.28);
+      border-left: 3px solid var(--red);
+      border-radius: 8px; padding: 13px 16px;
+      color: #f09090; font-size: 13px;
+    }
+
+    /* ── Results ── */
+    .results-header {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 16px;
+    }
+    .check-icon { font-size: 14px; color: var(--red); }
+    .results-title { font-size: 14px; font-weight: 700; color: var(--red); }
+    .results-sub {
+      font-size: 11px; color: var(--sub);
+      letter-spacing: 1px; text-transform: uppercase; margin-top: 2px;
+    }
+
+    #download-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px; margin-bottom: 12px;
+    }
+    .dl-card {
+      display: block; text-decoration: none;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--red);
+      border-radius: 8px; padding: 16px;
+      position: relative; overflow: hidden;
+      transition: all 0.2s;
+      animation: cardIn 0.38s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    .dl-card:nth-child(2) { animation-delay: 0.07s; }
+    .dl-card:nth-child(3) { animation-delay: 0.14s; }
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(12px) scale(0.95); }
+      to   { opacity: 1; transform: none; }
+    }
+    .dl-card:hover {
+      border-color: rgba(155,135,245,0.50);
+      background: rgba(155,135,245,0.04);
+      transform: translateY(-2px);
+    }
+    .dl-ext {
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: var(--red); margin-bottom: 8px;
+    }
+    .dl-name {
+      font-size: 12px; font-weight: 600; color: var(--white);
+      white-space: nowrap; overflow: hidden;
+      text-overflow: ellipsis; margin-bottom: 4px;
+    }
+    .dl-size { font-size: 11px; color: var(--sub); }
+    .dl-arrow {
+      position: absolute; top: 14px; right: 14px;
+      font-size: 11px; color: var(--muted);
+      transition: color 0.2s;
+    }
+    .dl-card:hover .dl-arrow { color: var(--red); }
+
+    #zipBtn {
+      width: 100%;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      padding: 13px;
+      border: 1px solid rgba(155,135,245,0.28);
+      background: rgba(155,135,245,0.05);
+      border-radius: 8px; color: var(--red);
+      font-family: 'Roboto', sans-serif;
+      font-size: 13px; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      cursor: pointer; transition: all 0.2s;
+    }
+    #zipBtn:hover {
+      background: rgba(155,135,245,0.10);
+      border-color: rgba(155,135,245,0.50);
+      transform: translateY(-1px);
+    }
+    #zipBtn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    /* ── Format info ── */
+    .section-label {
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: var(--red); margin-bottom: 16px;
+    }
+    .info-grid {
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 10px;
+    }
+    .info-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--red);
+      border-radius: 8px; padding: 16px;
+    }
+    .info-tag {
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: var(--red); margin-bottom: 8px;
+    }
+    .info-card p { font-size: 12px; color: var(--sub); line-height: 1.7; }
+
+    /* ── Footer ── */
+    .footer {
+      margin-top: 48px; padding-top: 24px;
+      border-top: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .footer span { font-size: 11px; color: var(--muted); }
+
+    @keyframes up {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-up { opacity: 0; animation: up 0.5s ease forwards; }
+    .fade-up:nth-child(1) { animation-delay: 0.40s; }
+    .fade-up:nth-child(2) { animation-delay: 0.47s; }
+    .fade-up:nth-child(3) { animation-delay: 0.54s; }
+
+    @media (max-width: 480px) {
+      #download-cards { grid-template-columns: 1fr; }
+      .info-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
-<body class="relative overflow-x-hidden">
-  <div class="grid-bg fixed inset-0 pointer-events-none z-0"></div>
+<body>
 
-  <div class="relative z-10 max-w-2xl mx-auto px-4 py-12 min-h-screen flex flex-col">
+  <div class="page">
 
-    <!-- Header -->
-    <header class="mb-12">
-      <div class="flex items-baseline gap-3 mb-2">
-        <span class="mono text-xs tracking-widest text-[var(--muted)] uppercase">v1.0</span>
-        <div class="h-px flex-1 bg-[var(--border)]"></div>
-        <span class="mono text-xs tracking-widest text-[var(--muted)] uppercase">Web Font Converter</span>
-      </div>
-      <h1 class="text-5xl font-light tracking-tight leading-none mt-4">
-        Font<span class="font-bold text-[var(--accent)]">Forge</span>
-      </h1>
-      <p class="text-[var(--muted)] mt-3 text-base font-light">
-        Upload any
-        <span class="mono text-sm bg-[var(--ink)] text-[var(--paper)] px-1.5 py-0.5 rounded">.ttf</span>
-        <span class="mono text-sm bg-[var(--ink)] text-[var(--paper)] px-1.5 py-0.5 rounded">.woff</span>
-        <span class="mono text-sm bg-[var(--ink)] text-[var(--paper)] px-1.5 py-0.5 rounded">.woff2</span>
-        &mdash; get all three back instantly.
-      </p>
-    </header>
+    <p class="eyebrow">⚠ Warning — Font Conversion Engine</p>
+    <h1>Convert any font<br>to all formats.</h1>
+    <p class="desc">Upload TTF, WOFF, or WOFF2 — receive all three web-ready formats instantly. Powered by Google WOFF2 WebAssembly.</p>
 
-    <!-- Drop Zone -->
-    <div
-      id="dropzone"
-      class="rounded-xl p-12 text-center bg-white mb-6"
-      onclick="document.getElementById('fileInput').click()"
-    >
-      <input type="file" id="fileInput" accept=".ttf,.woff,.woff2" class="hidden" />
+    <div class="divider"></div>
+
+    <!-- Dropzone -->
+    <div id="dropzone" onclick="document.getElementById('fileInput').click()">
+      <input type="file" id="fileInput" accept=".ttf,.woff,.woff2" style="display:none" />
 
       <div id="drop-idle">
-        <div class="w-14 h-14 mx-auto mb-4 rounded-full border-2 border-[var(--border)] flex items-center justify-center">
-          <svg class="w-6 h-6 text-[var(--muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
-          </svg>
+        <i class="fas fa-arrow-up-from-bracket drop-icon"></i>
+        <p class="drop-title">Drop your font file here</p>
+        <p class="drop-sub">or click to browse</p>
+        <div class="fmt-badges">
+          <span class="fmt-badge">.TTF</span>
+          <span class="fmt-badge">.WOFF</span>
+          <span class="fmt-badge">.WOFF2</span>
         </div>
-        <p class="font-medium text-[var(--ink)]">Drop your font file here</p>
-        <p class="text-sm text-[var(--muted)] mt-1">or click to browse</p>
-        <p class="mono text-xs text-[var(--muted)] mt-3 opacity-60">TTF &middot; WOFF &middot; WOFF2</p>
       </div>
 
-      <div id="drop-file" class="hidden">
-        <div class="w-14 h-14 mx-auto mb-4 rounded-full border-2 border-[var(--accent)] flex items-center justify-center">
-          <svg class="w-6 h-6 text-[var(--accent)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
-          </svg>
-        </div>
-        <div class="mono text-xs text-[var(--muted)] mb-1">Selected</div>
-        <div id="selected-name" class="font-bold text-lg text-[var(--ink)] truncate"></div>
-        <div id="selected-size" class="text-sm text-[var(--muted)] mt-1"></div>
+      <div id="drop-file" style="display:none; text-align:center;">
+        <i class="fas fa-file-code file-icon"></i>
+        <p class="file-label">Selected File</p>
+        <div id="selected-name"></div>
+        <div id="selected-size"></div>
       </div>
     </div>
 
-    <!-- Convert Button -->
-    <button
-      id="convertBtn"
-      disabled
-      onclick="convertFont()"
-      class="w-full py-3.5 rounded-xl font-medium text-sm tracking-wide transition-all
-             bg-[var(--ink)] text-[var(--paper)]
-             disabled:opacity-30 disabled:cursor-not-allowed
-             hover:enabled:bg-[var(--accent)] active:scale-[0.99]"
-    >
-      Convert Font
-    </button>
+    <!-- Buttons -->
+    <div class="btn-row">
+      <button id="convertBtn" disabled onclick="convertFont()">Convert Font</button>
+      <button id="resetBtn" onclick="resetUI()">Reset</button>
+    </div>
 
     <!-- Progress -->
-    <div id="progress-wrap" class="hidden mt-6">
-      <div class="flex items-center gap-3 mb-2">
+    <div id="progress-wrap" style="display:none; margin-bottom:16px;">
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
         <div class="spinner"></div>
-        <span id="progress-label" class="text-sm text-[var(--muted)]">Converting&hellip;</span>
+        <span id="progress-label" style="font-size:11px; color:var(--sub); letter-spacing:1px; text-transform:uppercase;">Converting...</span>
+        <span id="progress-pct" style="font-size:11px; color:var(--red); font-weight:700; margin-left:auto;">0%</span>
       </div>
-      <div class="h-1 rounded-full bg-[var(--border)] overflow-hidden">
-        <div id="progress-bar" class="h-full rounded-full bg-[var(--accent)]"></div>
-      </div>
+      <div class="progress-track"><div id="progress-bar"></div></div>
     </div>
 
     <!-- Error -->
-    <div id="error-box" class="hidden mt-6 p-4 rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm mono"></div>
+    <div id="error-box" style="display:none;" class="err-box">
+      <i class="fas fa-triangle-exclamation" style="color:var(--red); flex-shrink:0; margin-top:1px;"></i>
+      <span id="error-msg"></span>
+    </div>
 
     <!-- Results -->
-    <div id="results" class="hidden mt-8">
-      <div class="flex items-center gap-3 mb-5">
-        <div class="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style="background:var(--success)">
-          <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-          </svg>
+    <div id="results" style="display:none; margin-top:32px;">
+      <div class="results-header">
+        <i class="fas fa-circle-check check-icon"></i>
+        <div>
+          <div class="results-title">Conversion complete</div>
+          <div class="results-sub">3 files ready — click to download or get all as ZIP</div>
         </div>
-        <span class="font-medium" style="color:var(--success)">Conversion complete</span>
       </div>
-
-      <div id="download-cards" class="grid grid-cols-3 gap-3"></div>
-
-      <button
-        onclick="resetUI()"
-        class="mt-6 w-full py-2.5 rounded-xl text-sm text-[var(--muted)] border border-[var(--border)]
-               hover:border-[var(--ink)] hover:text-[var(--ink)] transition-all"
-      >
-        Convert another font
+      <div id="download-cards"></div>
+      <button id="zipBtn" onclick="downloadZip()">
+        <i class="fas fa-box-archive"></i>
+        Download All as ZIP
       </button>
     </div>
 
-    <!-- Info section -->
-    <div class="mt-12 grid grid-cols-3 gap-4">
-      <div class="p-4 rounded-xl bg-white border border-[var(--border)]">
-        <div class="mono text-xs font-bold uppercase tracking-wider text-[var(--accent)] mb-2">.TTF</div>
-        <p class="text-xs text-[var(--muted)] leading-relaxed">TrueType Font. The original, uncompressed format. Best for desktop use.</p>
-      </div>
-      <div class="p-4 rounded-xl bg-white border border-[var(--border)]">
-        <div class="mono text-xs font-bold uppercase tracking-wider text-[var(--accent)] mb-2">.WOFF</div>
-        <p class="text-xs text-[var(--muted)] leading-relaxed">Web Open Font Format. Compressed TTF for the web. Broad browser support.</p>
-      </div>
-      <div class="p-4 rounded-xl bg-white border border-[var(--border)]">
-        <div class="mono text-xs font-bold uppercase tracking-wider text-[var(--accent)] mb-2">.WOFF2</div>
-        <p class="text-xs text-[var(--muted)] leading-relaxed">Google's next-gen format. ~30% smaller than WOFF. Modern browsers.</p>
+    <!-- Format info -->
+    <div style="margin-top:48px;">
+      <p class="section-label">Format Reference</p>
+      <div class="info-grid">
+        <div class="info-card fade-up">
+          <div class="info-tag">.TTF</div>
+          <p>TrueType Font. Raw and uncompressed. Standard for desktop use.</p>
+        </div>
+        <div class="info-card fade-up">
+          <div class="info-tag">.WOFF</div>
+          <p>Web Open Font. zlib-compressed. Supported since IE9.</p>
+        </div>
+        <div class="info-card fade-up">
+          <div class="info-tag">.WOFF2</div>
+          <p>Google's format. Brotli-compressed. ~30% smaller than WOFF.</p>
+        </div>
       </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="mt-auto pt-12 flex items-center gap-4">
-      <div class="h-px flex-1 bg-[var(--border)]"></div>
-      <span class="mono text-xs text-[var(--muted)]">Powered by Google WOFF2 &middot; wawoff2</span>
-      <div class="h-px flex-1 bg-[var(--border)]"></div>
-    </footer>
+    <div class="footer">
+      <span>Built with wawoff2 — Google WOFF2 WebAssembly</span>
+      <span>v2.0.0</span>
+    </div>
+
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script>
     const dropzone = document.getElementById('dropzone');
     const fileInput = document.getElementById('fileInput');
     const convertBtn = document.getElementById('convertBtn');
     let selectedFile = null;
+    let convertedFiles = [];
 
     dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('drag-over'); });
-    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
+    ['dragleave','dragend'].forEach(ev => dropzone.addEventListener(ev, () => dropzone.classList.remove('drag-over')));
     dropzone.addEventListener('drop', (e) => {
-      e.preventDefault();
-      dropzone.classList.remove('drag-over');
-      const file = e.dataTransfer.files[0];
-      if (file) handleFile(file);
+      e.preventDefault(); dropzone.classList.remove('drag-over');
+      if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
     });
     fileInput.addEventListener('change', (e) => { if (e.target.files[0]) handleFile(e.target.files[0]); });
 
     function handleFile(file) {
       const ext = file.name.split('.').pop().toLowerCase();
-      if (!['ttf', 'woff', 'woff2'].includes(ext)) {
-        showError('Unsupported file type. Please upload .ttf, .woff, or .woff2');
-        return;
-      }
+      if (!['ttf','woff','woff2'].includes(ext)) { showError('Unsupported type. Upload .ttf, .woff, or .woff2'); return; }
       selectedFile = file;
-      document.getElementById('drop-idle').classList.add('hidden');
-      document.getElementById('drop-file').classList.remove('hidden');
+      document.getElementById('drop-idle').style.display = 'none';
+      document.getElementById('drop-file').style.display = 'block';
       document.getElementById('selected-name').textContent = file.name;
-      document.getElementById('selected-size').textContent = formatSize(file.size);
+      document.getElementById('selected-size').textContent = fmtSize(file.size);
       convertBtn.disabled = false;
       hideError();
-      document.getElementById('results').classList.add('hidden');
+      document.getElementById('results').style.display = 'none';
     }
 
-    function formatSize(bytes) {
-      if (bytes < 1024) return bytes + ' B';
-      if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
-      return (bytes / 1048576).toFixed(2) + ' MB';
+    function fmtSize(b) {
+      if (b < 1024) return b + ' B';
+      if (b < 1048576) return (b/1024).toFixed(1) + ' KB';
+      return (b/1048576).toFixed(2) + ' MB';
     }
 
     async function convertFont() {
       if (!selectedFile) return;
-      hideError();
-      showProgress(true);
+      hideError(); showProgress(true);
       convertBtn.disabled = true;
-      document.getElementById('results').classList.add('hidden');
-      animateProgress();
-
+      document.getElementById('results').style.display = 'none';
+      startProgress();
       try {
-        const formData = new FormData();
-        formData.append('font', selectedFile);
-
-        const res = await fetch('/api/convert', { method: 'POST', body: formData });
-
+        const fd = new FormData();
+        fd.append('font', selectedFile);
+        const res = await fetch('/api/convert', { method: 'POST', body: fd });
         if (!res.ok) {
-          const data = await res.json().catch(() => ({ error: 'Unknown error' }));
-          throw new Error(data.error || 'HTTP ' + res.status);
+          const d = await res.json().catch(() => ({ error: 'Unknown error' }));
+          throw new Error(d.error || 'HTTP ' + res.status);
         }
-
-        const contentType = res.headers.get('Content-Type') || '';
-        const boundary = contentType.split('boundary=')[1];
-        if (!boundary) throw new Error('Invalid response from server');
-
-        const arrayBuffer = await res.arrayBuffer();
-        const files = parseMultipart(arrayBuffer, boundary);
-
+        const ct = res.headers.get('Content-Type') || '';
+        const boundary = ct.split('boundary=')[1];
+        if (!boundary) throw new Error('Invalid server response');
+        const buf = await res.arrayBuffer();
+        convertedFiles = parseMultipart(buf, boundary);
         showProgress(false);
-        showResults(files);
+        renderResults(convertedFiles);
       } catch (err) {
         showProgress(false);
         showError(err.message);
@@ -260,130 +502,125 @@
       }
     }
 
-    let progressInterval;
-    function animateProgress() {
-      let val = 0;
+    let progInt; let progVal = 0;
+    function startProgress() {
+      progVal = 0;
       const bar = document.getElementById('progress-bar');
-      const label = document.getElementById('progress-label');
-      clearInterval(progressInterval);
-      progressInterval = setInterval(() => {
-        val = Math.min(val + Math.random() * 9, 85);
-        bar.style.width = val + '%';
-        label.textContent = val > 60 ? 'Packaging files\u2026' : 'Converting\u2026';
-      }, 200);
+      const pct = document.getElementById('progress-pct');
+      const lbl = document.getElementById('progress-label');
+      clearInterval(progInt);
+      progInt = setInterval(() => {
+        progVal = Math.min(progVal + Math.random() * 7, 88);
+        bar.style.width = progVal + '%';
+        pct.textContent = Math.floor(progVal) + '%';
+        lbl.textContent = progVal > 70 ? 'Packaging files...' : progVal > 40 ? 'Encoding formats...' : 'Converting...';
+      }, 180);
     }
 
     function showProgress(show) {
-      const wrap = document.getElementById('progress-wrap');
+      const w = document.getElementById('progress-wrap');
       if (show) {
-        wrap.classList.remove('hidden');
+        w.style.display = 'block';
         document.getElementById('progress-bar').style.width = '0%';
+        document.getElementById('progress-pct').textContent = '0%';
       } else {
-        clearInterval(progressInterval);
+        clearInterval(progInt);
         document.getElementById('progress-bar').style.width = '100%';
-        setTimeout(() => wrap.classList.add('hidden'), 400);
+        document.getElementById('progress-pct').textContent = '100%';
+        setTimeout(() => { w.style.display = 'none'; }, 500);
       }
     }
 
     function parseMultipart(buffer, boundary) {
-      const decoder = new TextDecoder('utf-8');
-      const uint8 = new Uint8Array(buffer);
+      const dec = new TextDecoder();
+      const u8 = new Uint8Array(buffer);
       const bnd = '--' + boundary;
       const files = [];
-
-      function strIndexOf(haystack, needle, start) {
+      function idxOf(hay, needle, from) {
         const n = needle.length;
-        outer: for (let i = start || 0; i <= haystack.length - n; i++) {
-          for (let j = 0; j < n; j++) {
-            if (haystack[i + j] !== needle.charCodeAt(j)) continue outer;
-          }
+        outer: for (let i = from||0; i <= hay.length - n; i++) {
+          for (let j = 0; j < n; j++) if (hay[i+j] !== needle.charCodeAt(j)) continue outer;
           return i;
         }
         return -1;
       }
-
-      let pos = strIndexOf(uint8, bnd, 0);
+      let pos = idxOf(u8, bnd, 0);
       while (pos !== -1) {
-        const nextPos = strIndexOf(uint8, bnd, pos + bnd.length);
-        if (nextPos === -1) break;
-
-        const partStart = pos + bnd.length + 2;
-        const partEnd = nextPos - 2;
-        const headerEnd = strIndexOf(uint8, '\r\n\r\n', partStart);
-        if (headerEnd === -1) { pos = nextPos; continue; }
-
-        const headers = decoder.decode(uint8.slice(partStart, headerEnd));
-        const filenameMatch = headers.match(/filename="([^"]+)"/i);
-        const ctMatch = headers.match(/Content-Type:\s*([^\r\n]+)/i);
-        const teMatch = headers.match(/Content-Transfer-Encoding:\s*([^\r\n]+)/i);
-
-        const filename = filenameMatch ? filenameMatch[1] : 'font';
-        const contentType = ctMatch ? ctMatch[1].trim() : 'application/octet-stream';
-        const isBase64 = teMatch && teMatch[1].toLowerCase().includes('base64');
-
-        const dataBytes = uint8.slice(headerEnd + 4, partEnd);
-        let blobData;
-        if (isBase64) {
-          const b64 = decoder.decode(dataBytes).replace(/\s/g, '');
-          const binary = atob(b64);
-          blobData = new Uint8Array(binary.length);
-          for (let i = 0; i < binary.length; i++) blobData[i] = binary.charCodeAt(i);
-        } else {
-          blobData = dataBytes;
+        const next = idxOf(u8, bnd, pos + bnd.length);
+        if (next === -1) break;
+        const ps = pos + bnd.length + 2, pe = next - 2;
+        const he = idxOf(u8, '\r\n\r\n', ps);
+        if (he === -1) { pos = next; continue; }
+        const hdrs = dec.decode(u8.slice(ps, he));
+        const fn = (hdrs.match(/filename="([^"]+)"/i)||[])[1] || 'font';
+        const ct = (hdrs.match(/Content-Type:\s*([^\r\n]+)/i)||[])[1]?.trim() || 'application/octet-stream';
+        const isB64 = /base64/i.test((hdrs.match(/Content-Transfer-Encoding:\s*([^\r\n]+)/i)||[])[1]||'');
+        const raw = u8.slice(he + 4, pe);
+        let data = raw;
+        if (isB64) {
+          const b64 = dec.decode(raw).replace(/\s/g,'');
+          const bin = atob(b64);
+          data = new Uint8Array(bin.length);
+          for (let i = 0; i < bin.length; i++) data[i] = bin.charCodeAt(i);
         }
-
-        files.push({ filename, contentType, data: blobData });
-        pos = nextPos;
+        files.push({ filename: fn, contentType: ct, data });
+        pos = next;
       }
       return files;
     }
 
-    function showResults(files) {
-      const container = document.getElementById('download-cards');
-      container.innerHTML = '';
-
-      const extColors = { ttf: '#0f0f0f', woff: '#0f0f0f', woff2: '#c84b00' };
-
-      files.forEach((file) => {
-        const ext = file.filename.split('.').pop().toLowerCase();
-        const blob = new Blob([file.data], { type: file.contentType });
-        const url = URL.createObjectURL(blob);
-        const size = formatSize(file.data.length);
-
-        const card = document.createElement('a');
-        card.href = url;
-        card.download = file.filename;
-        card.className = 'dl-card block p-4 rounded-xl bg-white border border-[var(--border)] hover:border-[var(--accent)] transition-all group no-underline';
-        card.style.textDecoration = 'none';
-        card.innerHTML = `
-          <div class="mono text-xs font-bold uppercase tracking-wider mb-3" style="color:var(--accent)">.${ext}</div>
-          <div class="text-sm font-medium text-[var(--ink)] truncate mb-1">${file.filename}</div>
-          <div class="text-xs text-[var(--muted)]">${size}</div>
-          <div class="mt-3 pt-3 border-t border-[var(--border)] text-xs font-medium text-[var(--accent)] opacity-0 group-hover:opacity-100 transition-opacity">
-            Download &darr;
-          </div>
-        `;
-        container.appendChild(card);
+    function renderResults(files) {
+      const c = document.getElementById('download-cards');
+      c.innerHTML = '';
+      files.forEach((f) => {
+        const ext = f.filename.split('.').pop().toLowerCase();
+        const url = URL.createObjectURL(new Blob([f.data], { type: f.contentType }));
+        const a = document.createElement('a');
+        a.href = url; a.download = f.filename; a.className = 'dl-card';
+        a.innerHTML = `
+          <div class="dl-ext">.${ext}</div>
+          <div class="dl-name">${f.filename}</div>
+          <div class="dl-size">${fmtSize(f.data.length)}</div>
+          <i class="fas fa-arrow-down dl-arrow"></i>`;
+        c.appendChild(a);
       });
+      document.getElementById('results').style.display = 'block';
+    }
 
-      document.getElementById('results').classList.remove('hidden');
+    async function downloadZip() {
+      if (!convertedFiles.length) return;
+      const btn = document.getElementById('zipBtn');
+      const orig = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<div class="spinner" style="width:13px;height:13px;border-width:1.5px;"></div> Building ZIP...';
+      try {
+        const zip = new JSZip();
+        convertedFiles.forEach(f => zip.file(f.filename, f.data));
+        const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+        const base = convertedFiles[0].filename.replace(/\.(ttf|woff2?)$/i, '');
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = base + '-fonts.zip';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      } finally {
+        btn.innerHTML = orig; btn.disabled = false;
+      }
     }
 
     function showError(msg) {
-      const box = document.getElementById('error-box');
-      box.textContent = '⚠ ' + msg;
-      box.classList.remove('hidden');
+      document.getElementById('error-msg').textContent = msg;
+      document.getElementById('error-box').style.display = 'flex';
     }
-    function hideError() { document.getElementById('error-box').classList.add('hidden'); }
+    function hideError() { document.getElementById('error-box').style.display = 'none'; }
 
     function resetUI() {
-      selectedFile = null;
-      fileInput.value = '';
-      document.getElementById('drop-idle').classList.remove('hidden');
-      document.getElementById('drop-file').classList.add('hidden');
-      document.getElementById('results').classList.add('hidden');
+      selectedFile = null; convertedFiles = []; fileInput.value = '';
+      document.getElementById('drop-idle').style.display = 'block';
+      document.getElementById('drop-file').style.display = 'none';
+      document.getElementById('results').style.display = 'none';
       convertBtn.disabled = true;
-      hideError();
+      hideError(); clearInterval(progInt);
+      document.getElementById('progress-wrap').style.display = 'none';
     }
   </script>
 </body>
