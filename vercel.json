@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "routes": [
+    {
+      "src": "/api/convert",
+      "dest": "/api/convert.js"
+    },
+    {
+      "src": "/",
+      "dest": "/public/index.html"
+    }
+  ],
+  "functions": {
+    "api/convert.js": {
+      "maxDuration": 30,
+      "memory": 1024
+    }
+  }
+}

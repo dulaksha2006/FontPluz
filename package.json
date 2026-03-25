@@ -1,0 +1,17 @@
+{
+  "name": "font-converter",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'No build step'"
+  },
+  "dependencies": {
+    "wawoff2": "^2.0.1",
+    "ttf2woff": "^3.0.0",
+    "busboy": "^1.6.0"
+  },
+  "engines": {
+    "node": "18.x"
+  }
+}

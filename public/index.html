@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FontForge — Web Font Converter</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #0f0f0f;
+      --paper: #f5f0e8;
+      --accent: #c84b00;
+      --muted: #6b6560;
+      --border: #d6cfc4;
+      --success: #1a6b3c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      background-color: var(--paper);
+      color: var(--ink);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+    }
+    .mono { font-family: 'Space Mono', monospace; }
+    #dropzone {
+      border: 2px dashed var(--border);
+      transition: border-color 0.2s, background 0.2s;
+      cursor: pointer;
+    }
+    #dropzone.drag-over {
+      border-color: var(--accent);
+      background: rgba(200, 75, 0, 0.04);
+    }
+    #dropzone:hover { border-color: var(--accent); }
+    #progress-bar { width: 0%; transition: width 0.4s ease; }
+    .dl-card { animation: popIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both; }
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.92); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .dl-card:nth-child(2) { animation-delay: 0.08s; }
+    .dl-card:nth-child(3) { animation-delay: 0.16s; }
+    .spinner {
+      width: 20px; height: 20px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .grid-bg {
+      background-image: linear-gradient(var(--border) 1px, transparent 1px),
+                        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 40px 40px;
+      opacity: 0.4;
+    }
+  </style>
+</head>
+<body class="relative overflow-x-hidden">
+  <div class="grid-bg fixed inset-0 pointer-events-none z-0"></div>
+
+  <div class="relative z-10 max-w-2xl mx-auto px-4 py-12 min-h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="mb-12">
+      <div class="flex items-baseline gap-3 mb-2">
+        <span class="mono text-xs tracking-widest text-[var(--muted)] uppercase">v1.0</span>
+        <div class="h-px flex-1 bg-[var(--border)]"></div>
+        <span class="mono text-xs tracking-widest text-[var(--muted)] uppercase">Web Font Converter</span>
+      </div>
+      <h1 class="text-5xl font-light tracking-tight leading-none mt-4">
+        Font<span class="font-bold text-[var(--accent)]">Forge</span>
+      </h1>
+      <p class="text-[var(--muted)] mt-3 text-base font-light">
+        Upload any
+        <span class="mono text-sm bg-[var(--ink)] text-[var(--paper)] px-1.5 py-0.5 rounded">.ttf</span>
+        <span class="mono text-sm bg-[var(--ink)] text-[var(--paper)] px-1.5 py-0.5 rounded">.woff</span>
+        <span class="mono text-sm bg-[var(--ink)] text-[var(--paper)] px-1.5 py-0.5 rounded">.woff2</span>
+        &mdash; get all three back instantly.
+      </p>
+    </header>
+
+    <!-- Drop Zone -->
+    <div
+      id="dropzone"
+      class="rounded-xl p-12 text-center bg-white mb-6"
+      onclick="document.getElementById('fileInput').click()"
+    >
+      <input type="file" id="fileInput" accept=".ttf,.woff,.woff2" class="hidden" />
+
+      <div id="drop-idle">
+        <div class="w-14 h-14 mx-auto mb-4 rounded-full border-2 border-[var(--border)] flex items-center justify-center">
+          <svg class="w-6 h-6 text-[var(--muted)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
+          </svg>
+        </div>
+        <p class="font-medium text-[var(--ink)]">Drop your font file here</p>
+        <p class="text-sm text-[var(--muted)] mt-1">or click to browse</p>
+        <p class="mono text-xs text-[var(--muted)] mt-3 opacity-60">TTF &middot; WOFF &middot; WOFF2</p>
+      </div>
+
+      <div id="drop-file" class="hidden">
+        <div class="w-14 h-14 mx-auto mb-4 rounded-full border-2 border-[var(--accent)] flex items-center justify-center">
+          <svg class="w-6 h-6 text-[var(--accent)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+          </svg>
+        </div>
+        <div class="mono text-xs text-[var(--muted)] mb-1">Selected</div>
+        <div id="selected-name" class="font-bold text-lg text-[var(--ink)] truncate"></div>
+        <div id="selected-size" class="text-sm text-[var(--muted)] mt-1"></div>
+      </div>
+    </div>
+
+    <!-- Convert Button -->
+    <button
+      id="convertBtn"
+      disabled
+      onclick="convertFont()"
+      class="w-full py-3.5 rounded-xl font-medium text-sm tracking-wide transition-all
+             bg-[var(--ink)] text-[var(--paper)]
+             disabled:opacity-30 disabled:cursor-not-allowed
+             hover:enabled:bg-[var(--accent)] active:scale-[0.99]"
+    >
+      Convert Font
+    </button>
+
+    <!-- Progress -->
+    <div id="progress-wrap" class="hidden mt-6">
+      <div class="flex items-center gap-3 mb-2">
+        <div class="spinner"></div>
+        <span id="progress-label" class="text-sm text-[var(--muted)]">Converting&hellip;</span>
+      </div>
+      <div class="h-1 rounded-full bg-[var(--border)] overflow-hidden">
+        <div id="progress-bar" class="h-full rounded-full bg-[var(--accent)]"></div>
+      </div>
+    </div>
+
+    <!-- Error -->
+    <div id="error-box" class="hidden mt-6 p-4 rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm mono"></div>
+
+    <!-- Results -->
+    <div id="results" class="hidden mt-8">
+      <div class="flex items-center gap-3 mb-5">
+        <div class="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style="background:var(--success)">
+          <svg class="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+          </svg>
+        </div>
+        <span class="font-medium" style="color:var(--success)">Conversion complete</span>
+      </div>
+
+      <div id="download-cards" class="grid grid-cols-3 gap-3"></div>
+
+      <button
+        onclick="resetUI()"
+        class="mt-6 w-full py-2.5 rounded-xl text-sm text-[var(--muted)] border border-[var(--border)]
+               hover:border-[var(--ink)] hover:text-[var(--ink)] transition-all"
+      >
+        Convert another font
+      </button>
+    </div>
+
+    <!-- Info section -->
+    <div class="mt-12 grid grid-cols-3 gap-4">
+      <div class="p-4 rounded-xl bg-white border border-[var(--border)]">
+        <div class="mono text-xs font-bold uppercase tracking-wider text-[var(--accent)] mb-2">.TTF</div>
+        <p class="text-xs text-[var(--muted)] leading-relaxed">TrueType Font. The original, uncompressed format. Best for desktop use.</p>
+      </div>
+      <div class="p-4 rounded-xl bg-white border border-[var(--border)]">
+        <div class="mono text-xs font-bold uppercase tracking-wider text-[var(--accent)] mb-2">.WOFF</div>
+        <p class="text-xs text-[var(--muted)] leading-relaxed">Web Open Font Format. Compressed TTF for the web. Broad browser support.</p>
+      </div>
+      <div class="p-4 rounded-xl bg-white border border-[var(--border)]">
+        <div class="mono text-xs font-bold uppercase tracking-wider text-[var(--accent)] mb-2">.WOFF2</div>
+        <p class="text-xs text-[var(--muted)] leading-relaxed">Google's next-gen format. ~30% smaller than WOFF. Modern browsers.</p>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="mt-auto pt-12 flex items-center gap-4">
+      <div class="h-px flex-1 bg-[var(--border)]"></div>
+      <span class="mono text-xs text-[var(--muted)]">Powered by Google WOFF2 &middot; wawoff2</span>
+      <div class="h-px flex-1 bg-[var(--border)]"></div>
+    </footer>
+  </div>
+
+  <script>
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('fileInput');
+    const convertBtn = document.getElementById('convertBtn');
+    let selectedFile = null;
+
+    dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('drag-over'); });
+    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (file) handleFile(file);
+    });
+    fileInput.addEventListener('change', (e) => { if (e.target.files[0]) handleFile(e.target.files[0]); });
+
+    function handleFile(file) {
+      const ext = file.name.split('.').pop().toLowerCase();
+      if (!['ttf', 'woff', 'woff2'].includes(ext)) {
+        showError('Unsupported file type. Please upload .ttf, .woff, or .woff2');
+        return;
+      }
+      selectedFile = file;
+      document.getElementById('drop-idle').classList.add('hidden');
+      document.getElementById('drop-file').classList.remove('hidden');
+      document.getElementById('selected-name').textContent = file.name;
+      document.getElementById('selected-size').textContent = formatSize(file.size);
+      convertBtn.disabled = false;
+      hideError();
+      document.getElementById('results').classList.add('hidden');
+    }
+
+    function formatSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / 1048576).toFixed(2) + ' MB';
+    }
+
+    async function convertFont() {
+      if (!selectedFile) return;
+      hideError();
+      showProgress(true);
+      convertBtn.disabled = true;
+      document.getElementById('results').classList.add('hidden');
+      animateProgress();
+
+      try {
+        const formData = new FormData();
+        formData.append('font', selectedFile);
+
+        const res = await fetch('/api/convert', { method: 'POST', body: formData });
+
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({ error: 'Unknown error' }));
+          throw new Error(data.error || 'HTTP ' + res.status);
+        }
+
+        const contentType = res.headers.get('Content-Type') || '';
+        const boundary = contentType.split('boundary=')[1];
+        if (!boundary) throw new Error('Invalid response from server');
+
+        const arrayBuffer = await res.arrayBuffer();
+        const files = parseMultipart(arrayBuffer, boundary);
+
+        showProgress(false);
+        showResults(files);
+      } catch (err) {
+        showProgress(false);
+        showError(err.message);
+        convertBtn.disabled = false;
+      }
+    }
+
+    let progressInterval;
+    function animateProgress() {
+      let val = 0;
+      const bar = document.getElementById('progress-bar');
+      const label = document.getElementById('progress-label');
+      clearInterval(progressInterval);
+      progressInterval = setInterval(() => {
+        val = Math.min(val + Math.random() * 9, 85);
+        bar.style.width = val + '%';
+        label.textContent = val > 60 ? 'Packaging files\u2026' : 'Converting\u2026';
+      }, 200);
+    }
+
+    function showProgress(show) {
+      const wrap = document.getElementById('progress-wrap');
+      if (show) {
+        wrap.classList.remove('hidden');
+        document.getElementById('progress-bar').style.width = '0%';
+      } else {
+        clearInterval(progressInterval);
+        document.getElementById('progress-bar').style.width = '100%';
+        setTimeout(() => wrap.classList.add('hidden'), 400);
+      }
+    }
+
+    function parseMultipart(buffer, boundary) {
+      const decoder = new TextDecoder('utf-8');
+      const uint8 = new Uint8Array(buffer);
+      const bnd = '--' + boundary;
+      const files = [];
+
+      function strIndexOf(haystack, needle, start) {
+        const n = needle.length;
+        outer: for (let i = start || 0; i <= haystack.length - n; i++) {
+          for (let j = 0; j < n; j++) {
+            if (haystack[i + j] !== needle.charCodeAt(j)) continue outer;
+          }
+          return i;
+        }
+        return -1;
+      }
+
+      let pos = strIndexOf(uint8, bnd, 0);
+      while (pos !== -1) {
+        const nextPos = strIndexOf(uint8, bnd, pos + bnd.length);
+        if (nextPos === -1) break;
+
+        const partStart = pos + bnd.length + 2;
+        const partEnd = nextPos - 2;
+        const headerEnd = strIndexOf(uint8, '\r\n\r\n', partStart);
+        if (headerEnd === -1) { pos = nextPos; continue; }
+
+        const headers = decoder.decode(uint8.slice(partStart, headerEnd));
+        const filenameMatch = headers.match(/filename="([^"]+)"/i);
+        const ctMatch = headers.match(/Content-Type:\s*([^\r\n]+)/i);
+        const teMatch = headers.match(/Content-Transfer-Encoding:\s*([^\r\n]+)/i);
+
+        const filename = filenameMatch ? filenameMatch[1] : 'font';
+        const contentType = ctMatch ? ctMatch[1].trim() : 'application/octet-stream';
+        const isBase64 = teMatch && teMatch[1].toLowerCase().includes('base64');
+
+        const dataBytes = uint8.slice(headerEnd + 4, partEnd);
+        let blobData;
+        if (isBase64) {
+          const b64 = decoder.decode(dataBytes).replace(/\s/g, '');
+          const binary = atob(b64);
+          blobData = new Uint8Array(binary.length);
+          for (let i = 0; i < binary.length; i++) blobData[i] = binary.charCodeAt(i);
+        } else {
+          blobData = dataBytes;
+        }
+
+        files.push({ filename, contentType, data: blobData });
+        pos = nextPos;
+      }
+      return files;
+    }
+
+    function showResults(files) {
+      const container = document.getElementById('download-cards');
+      container.innerHTML = '';
+
+      const extColors = { ttf: '#0f0f0f', woff: '#0f0f0f', woff2: '#c84b00' };
+
+      files.forEach((file) => {
+        const ext = file.filename.split('.').pop().toLowerCase();
+        const blob = new Blob([file.data], { type: file.contentType });
+        const url = URL.createObjectURL(blob);
+        const size = formatSize(file.data.length);
+
+        const card = document.createElement('a');
+        card.href = url;
+        card.download = file.filename;
+        card.className = 'dl-card block p-4 rounded-xl bg-white border border-[var(--border)] hover:border-[var(--accent)] transition-all group no-underline';
+        card.style.textDecoration = 'none';
+        card.innerHTML = `
+          <div class="mono text-xs font-bold uppercase tracking-wider mb-3" style="color:var(--accent)">.${ext}</div>
+          <div class="text-sm font-medium text-[var(--ink)] truncate mb-1">${file.filename}</div>
+          <div class="text-xs text-[var(--muted)]">${size}</div>
+          <div class="mt-3 pt-3 border-t border-[var(--border)] text-xs font-medium text-[var(--accent)] opacity-0 group-hover:opacity-100 transition-opacity">
+            Download &darr;
+          </div>
+        `;
+        container.appendChild(card);
+      });
+
+      document.getElementById('results').classList.remove('hidden');
+    }
+
+    function showError(msg) {
+      const box = document.getElementById('error-box');
+      box.textContent = '⚠ ' + msg;
+      box.classList.remove('hidden');
+    }
+    function hideError() { document.getElementById('error-box').classList.add('hidden'); }
+
+    function resetUI() {
+      selectedFile = null;
+      fileInput.value = '';
+      document.getElementById('drop-idle').classList.remove('hidden');
+      document.getElementById('drop-file').classList.add('hidden');
+      document.getElementById('results').classList.add('hidden');
+      convertBtn.disabled = true;
+      hideError();
+    }
+  </script>
+</body>
+</html>
