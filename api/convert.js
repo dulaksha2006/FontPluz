@@ -1,5 +1,6 @@
 import Busboy from "busboy";
 import wawoff2 from "wawoff2";
+import { inflateSync, deflateSync } from "zlib";
 
 /**
  * Detect font format from buffer magic bytes.
@@ -35,7 +36,6 @@ async function toTTF(buffer, format) {
  * Minimal WOFF to sfnt (TTF) converter.
  */
 function woffToSfnt(woffBuf) {
-  const { inflateSync } = require("zlib");
   const flavor = woffBuf.readUInt32BE(4);
   const numTables = woffBuf.readUInt16BE(12);
 
@@ -103,7 +103,6 @@ function woffToSfnt(woffBuf) {
  * Convert TTF/sfnt buffer to WOFF.
  */
 function sfntToWoff(ttfBuf) {
-  const { deflateSync } = require("zlib");
   const flavor = ttfBuf.readUInt32BE(0);
   const numTables = ttfBuf.readUInt16BE(4);
 
